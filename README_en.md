@@ -37,6 +37,8 @@ No complex MCP setup needed. One CLAUDE.md + one index.md per folder is enough f
 |--------|------|
 | PDF (Chinese) | [Obsidian-AI-v1.0.0.pdf](Obsidian-AI-v1.0.0.pdf) |
 
+> 💡 Download the PDF for the best reading experience. GitHub's online preview may not render properly.
+
 ## Table of Contents
 
 | Chapter | Title |

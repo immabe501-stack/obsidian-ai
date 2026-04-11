@@ -37,6 +37,8 @@ Karpathy 的核心论点：与其建 RAG 让 LLM 检索你的笔记，不如让 
 |------|------|
 | PDF（中文） | [Obsidian-AI-v1.0.0.pdf](Obsidian-AI-v1.0.0.pdf) |
 
+> 💡 PDF 文件建议下载后阅读，体验更佳。GitHub 在线预览可能无法完整渲染。
+
 ## 目录
 
 | 章节 | 标题 |
