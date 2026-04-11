@@ -1,81 +1,81 @@
-# Obsidian + Claude Code: Rebuild Your Second Brain with AI
+# Obsidian + Claude Code：用AI重建你的第二大脑
 
-> Build an AI-powered personal knowledge management system from scratch. Free, open-source, continuously updated.
+> 从零搭建AI驱动的个人知识管理系统。免费、开源、持续更新。
 
-![Cover](screenshots/cover.png)
+![封面](screenshots/cover.png)
 
-## What's Inside
+## 内容概览
 
-This book is not just another Obsidian tutorial. It's a methodology + toolkit for knowledge management in the AI era:
+这不是又一本 Obsidian 教程，而是「AI 时代的知识管理方法论 + 落地工具」：
 
-- **The Problem** -- Why your notes app is an "information graveyard" and why AI is the only solution
-- **Why Obsidian** -- Three billion-dollar projects independently chose Markdown for AI memory. This is not a coincidence
-- **Getting Started** -- Set up Obsidian and connect Claude Code in under 40 minutes
-- **Vault Architecture** -- Design your vault so AI can efficiently navigate and maintain it
-- **Karpathy's Wiki Pattern** -- Let AI maintain your knowledge base instead of building RAG
-- **7 Real Workflows** -- Copy-paste ready prompts and step-by-step operations
-- **Plugin Ecosystem** -- The 4 plugins you actually need out of 1000+ options
-- **Advanced Patterns** -- Git version control, custom Skills, local AI, multi-vault strategies
+- **问题篇** -- 为什么你的笔记软件是「信息坟场」，以及为什么只有 AI 能解决这个问题
+- **选择篇** -- 三个完全独立的十亿级项目，不约而同选了 Markdown 存储 AI 的记忆，这不是巧合
+- **上手篇** -- 40 分钟内搞定 Obsidian 安装 + Claude Code 接入
+- **架构篇** -- 设计你的 vault，让 AI 能高效地理解和操作它
+- **知识库篇** -- Karpathy 的 LLM Wiki 模式：让 AI 维护你的知识库，而不是建 RAG
+- **实战篇** -- 7 个可以直接抄的工作流，每个都有具体步骤和 prompt
+- **生态篇** -- 1000+ 插件中你真正需要的 4 个
+- **进阶篇** -- Git 版本控制、自定义 Skills、本地 AI、多 Vault 策略
 
-## Key Insights
+## 核心洞察
 
-**Insight 1: Markdown is the native interface for AI Agents**
+**洞察1：Markdown 是 AI Agent 的原生接口**
 
-Manus ($2B acquisition), OpenClaw (145K+ stars), and Claude Code all chose Markdown files -- not vector databases -- for AI memory. Obsidian vault = a bunch of Markdown files.
+Manus（被 Meta 20亿美元收购）、OpenClaw（14.5万+ stars）、Claude Code 都选了 Markdown 文件存储 AI 的记忆，不是向量数据库。Obsidian vault 就是一堆 Markdown 文件。
 
-**Insight 2: LLMs should be "compilers", not "retrievers"**
+**洞察2：LLM 应该是「编译器」而非「检索器」**
 
-Karpathy's core argument: instead of building RAG to retrieve your notes, let the LLM directly maintain your knowledge base. Validated at 400K+ characters scale.
+Karpathy 的核心论点：与其建 RAG 让 LLM 检索你的笔记，不如让 LLM 直接维护你的知识库。在 40 万字规模下验证有效。
 
-**Insight 3: CLAUDE.md + index.md does 80% of the work**
+**洞察3：CLAUDE.md + index.md 做了 80% 的工作**
 
-No complex MCP setup needed. One CLAUDE.md + one index.md per folder is enough for Claude Code to efficiently navigate your entire knowledge base.
+不需要复杂的 MCP 设置。一个 CLAUDE.md + 每个文件夹一个 index.md，就足以让 Claude Code 高效导航整个知识库。
 
-## Download
+## 下载
 
-| Format | Link |
-|--------|------|
-| PDF (Chinese) | [Obsidian + Claude Code：用AI重建你的第二大脑-v1.0.0.pdf](Obsidian%20%2B%20Claude%20Code%EF%BC%9A%E7%94%A8AI%E9%87%8D%E5%BB%BA%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%BA%8C%E5%A4%A7%E8%84%91-v1.0.0.pdf) |
+| 格式 | 链接 |
+|------|------|
+| PDF（中文） | [Obsidian + Claude Code：用AI重建你的第二大脑-v1.0.0.pdf](Obsidian%20%2B%20Claude%20Code%EF%BC%9A%E7%94%A8AI%E9%87%8D%E5%BB%BA%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%BA%8C%E5%A4%A7%E8%84%91-v1.0.0.pdf) |
 
-## Table of Contents
+## 目录
 
-| Chapter | Title |
-|---------|-------|
-| Preface | My notes were never organized by me |
-| §01 | The Information Graveyard |
-| §02 | Why Obsidian |
-| §03 | Get Started in 30 Minutes |
-| §04 | Enter Claude Code |
-| §05 | Design Your Vault |
-| §06 | Let AI Maintain Your Knowledge Base |
-| §07 | 7 Real Workflows |
-| §08 | Plugins and Tools |
-| §09 | Advanced Patterns |
+| 章节 | 标题 |
+|------|------|
+| 自序 | 我的笔记从来不是我整理的 |
+| §01 | 信息坟场 |
+| §02 | 为什么是 Obsidian |
+| §03 | 30 分钟上手 Obsidian |
+| §04 | Claude Code 进场 |
+| §05 | 设计你的 Vault 架构 |
+| §06 | 让 AI 维护你的知识库 |
+| §07 | 7 个真实工作流 |
+| §08 | 插件和工具生态 |
+| §09 | 进阶 |
 
-## About the Author
+## 关于作者
 
-**Huashu** -- AI Native Coder, indie developer, and tech content creator with 300K+ followers. Creator of "Kitten Ring Light" (App Store paid app #1) and author of multiple AI programming guides.
+**花叔** -- AI Native Coder，独立开发者，AI自媒体博主，30万+粉丝。代表作：小猫补光灯（App Store 付费榜 Top 1）、「AI编程橙皮书」系列。
 
 - X/Twitter: [@AlchainHust](https://x.com/AlchainHust)
 - YouTube: [@Alchain](https://www.youtube.com/@Alchain)
-- Bilibili: [Huashu](https://space.bilibili.com/14097567/)
-- WeChat: Huashu (search in WeChat)
-- Website: [huasheng.ai](https://www.huasheng.ai/)
+- B站: [花叔](https://space.bilibili.com/14097567/)
+- 公众号: 花叔（微信搜索）
+- 官网: [huasheng.ai](https://www.huasheng.ai/)
 
-## Orange Book Series
+## 橙皮书系列
 
-This is part of the **Orange Book Series** -- a collection of free, in-depth guides on AI tools and emerging technology:
+本书是**橙皮书系列**的一部分 -- 免费、深入的 AI 工具与新兴技术指南：
 
-| Book | Repository |
-|------|-----------|
-| Claude Code: The Complete Guide | [claude-code-orange-book](https://github.com/alchaincyf/claude-code-orange-book) |
-| Claude Code: Source Code Analysis | [claude-code-source-analysis-orange-book](https://github.com/alchaincyf/claude-code-source-analysis-orange-book) |
+| 书名 | 仓库 |
+|------|------|
+| Claude Code 从入门到精通 | [claude-code-orange-book](https://github.com/alchaincyf/claude-code-orange-book) |
+| Claude Code 源码解析 | [claude-code-source-analysis-orange-book](https://github.com/alchaincyf/claude-code-source-analysis-orange-book) |
 | Agent Skills | [agent-skills-orange-book](https://github.com/alchaincyf/agent-skills-orange-book) |
 | Harness Engineering | [harness-engineering-orange-book](https://github.com/alchaincyf/harness-engineering-orange-book) |
 | OpenClaw | [openclaw-orange-book](https://github.com/alchaincyf/openclaw-orange-book) |
-| Polymarket: The Complete Guide | [polymarket-orange-book](https://github.com/alchaincyf/polymarket-orange-book) |
-| **Obsidian + Claude Code** | **This repo** |
+| Polymarket 完全指南 | [polymarket-orange-book](https://github.com/alchaincyf/polymarket-orange-book) |
+| **Obsidian + Claude Code** | **本仓库** |
 
-## License
+## 许可
 
-This work is shared freely for educational purposes. Feel free to share and reference with attribution.
+本作品免费分享，用于学习交流。欢迎转载和引用，请注明出处。
