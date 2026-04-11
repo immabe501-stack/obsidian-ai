@@ -21,7 +21,7 @@ This book is not just another Obsidian tutorial. It's a methodology + toolkit fo
 
 **Insight 1: Markdown is the native interface for AI Agents**
 
-Manus ($2B acquisition), OpenClaw (145K+ stars), and Claude Code all chose Markdown files -- not vector databases -- for AI memory. Obsidian vault = a bunch of Markdown files.
+Manus ($2B acquisition), OpenClaw (355K+ stars), and Claude Code all chose Markdown files -- not vector databases -- for AI memory. Obsidian vault = a bunch of Markdown files.
 
 **Insight 2: LLMs should be "compilers", not "retrievers"**
 
@@ -35,7 +35,7 @@ No complex MCP setup needed. One CLAUDE.md + one index.md per folder is enough f
 
 | Format | Link |
 |--------|------|
-| PDF (Chinese) | [Obsidian + Claude Code：用AI重建你的第二大脑-v1.0.0.pdf](Obsidian%20%2B%20Claude%20Code%EF%BC%9A%E7%94%A8AI%E9%87%8D%E5%BB%BA%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%BA%8C%E5%A4%A7%E8%84%91-v1.0.0.pdf) |
+| PDF (Chinese) | [Obsidian-AI-v1.0.0.pdf](Obsidian-AI-v1.0.0.pdf) |
 
 ## Table of Contents
 

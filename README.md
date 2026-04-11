@@ -21,7 +21,7 @@
 
 **洞察1：Markdown 是 AI Agent 的原生接口**
 
-Manus（被 Meta 20亿美元收购）、OpenClaw（14.5万+ stars）、Claude Code 都选了 Markdown 文件存储 AI 的记忆，不是向量数据库。Obsidian vault 就是一堆 Markdown 文件。
+Manus（被 Meta 20亿美元收购）、OpenClaw（35.5万+ stars）、Claude Code 都选了 Markdown 文件存储 AI 的记忆，不是向量数据库。Obsidian vault 就是一堆 Markdown 文件。
 
 **洞察2：LLM 应该是「编译器」而非「检索器」**
 
@@ -35,7 +35,7 @@ Karpathy 的核心论点：与其建 RAG 让 LLM 检索你的笔记，不如让 
 
 | 格式 | 链接 |
 |------|------|
-| PDF（中文） | [Obsidian + Claude Code：用AI重建你的第二大脑-v1.0.0.pdf](Obsidian%20%2B%20Claude%20Code%EF%BC%9A%E7%94%A8AI%E9%87%8D%E5%BB%BA%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%BA%8C%E5%A4%A7%E8%84%91-v1.0.0.pdf) |
+| PDF（中文） | [Obsidian-AI-v1.0.0.pdf](Obsidian-AI-v1.0.0.pdf) |
 
 ## 目录
 
