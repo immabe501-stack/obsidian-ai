@@ -2,6 +2,12 @@
 
 > 从零搭建AI驱动的个人知识管理系统。免费、开源、持续更新。
 
+<p align="center">
+  <img src="assets/hero.gif" alt="obsidian-ai-orange-book Hero Animation" />
+  <br/>
+  <sub>动画由 <a href="https://github.com/alchaincyf/huashu-design">huashu-design</a> skill 制作</sub>
+</p>
+
 ![封面](screenshots/cover.png)
 
 ## 内容概览
