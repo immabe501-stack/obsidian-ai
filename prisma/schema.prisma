@@ -19,11 +19,15 @@ datasource db {
 // ─────────────────────────────────────────────────────────────
 model User {
   id            String   @id @default(cuid())
+  employeeNo    String   @unique             // 員工編號（HR 配發）
   email         String   @unique
   passwordHash  String
-  name          String
+  name          String                       // 顯示用姓名（中文）
   role          Role     @default(EMPLOYEE)
   hireDate      DateTime
+  department    String?                      // 部門
+  jobTitle      String?                      // 職稱
+  employmentType EmploymentType @default(FULL_TIME)
   active        Boolean  @default(true)
 
   // 直屬主管（自關聯）
@@ -31,16 +35,77 @@ model User {
   manager       User?    @relation("ManagerSubordinates", fields: [managerId], references: [id])
   subordinates  User[]   @relation("ManagerSubordinates")
 
+  // 員工手冊（1:1）
+  profile       EmployeeProfile?
+
   // 反向關聯
   leaveRequests       LeaveRequest[] @relation("Requester")
   approvedRequests    LeaveRequest[] @relation("Approver")
   balanceAdjustments  BalanceAdjustment[]
+  payouts             LeavePayout[]
   auditLogs           AuditLog[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([managerId])
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+
+// ─────────────────────────────────────────────────────────────
+// 員工手冊（個人資料）
+// 與 User 分表以便 (a) 嚴格控管敏感欄位讀取  (b) 之後新增欄位不影響 auth flow
+// ─────────────────────────────────────────────────────────────
+model EmployeeProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 基本資料
+  chineseName    String?
+  englishName    String?
+  birthDate      DateTime?
+  gender         Gender?
+  maritalStatus  MaritalStatus?
+
+  // 聯絡資訊（員工可自行編輯）
+  phone          String?
+  mobile         String?
+  registeredAddress String?  // 戶籍地址
+  mailingAddress    String?  // 通訊地址
+
+  // 緊急聯絡人（員工可自行編輯）
+  emergencyContactName     String?
+  emergencyContactRelation String?
+  emergencyContactPhone    String?
+
+  // 敏感資料：AES-256-GCM 加密儲存，僅 admin 可讀寫
+  nationalIdEncrypted   String?  // 身分證字號（加密）
+  bankName              String?
+  bankAccountEncrypted  String?  // 薪轉帳戶（加密）
+
+  updatedAt     DateTime @updatedAt
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  PREFER_NOT_TO_SAY
 }
 
 enum Role {
@@ -93,20 +158,42 @@ enum HalfDayPeriod {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 餘額手動調整（admin 用，例如「補發 2 天」「轉結」）
+// 餘額手動調整（admin 用，例如「補發 2 天」）
+// 採到職週年日制：用 anniversaryYearStart 標示適用週年度
 // 當年度餘額 = 法定應有 + Σ(adjustments) − Σ(已核准天數)
 // ─────────────────────────────────────────────────────────────
 model BalanceAdjustment {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  year      Int      // 適用年度
-  days      Float    // 可為負值
-  reason    String
-  createdBy String   // admin user id
-  createdAt DateTime @default(now())
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  anniversaryYearStart DateTime // 該週年度起始日（即某次到職週年日）
+  days                 Float    // 可為負值
+  reason               String
+  createdBy            String   // admin user id
+  createdAt            DateTime @default(now())
 
-  @@index([userId, year])
+  @@index([userId, anniversaryYearStart])
+}
+
+// ─────────────────────────────────────────────────────────────
+// 折發工資紀錄
+// 員工週年日結算時，HR 將未休完天數折發成工資
+// 寫入後該年度餘額視同清空
+// ─────────────────────────────────────────────────────────────
+model LeavePayout {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  anniversaryYearStart DateTime // 被結算的週年度起始日
+  anniversaryYearEnd   DateTime // 結算日（下一個週年日前一天）
+  unusedDays           Float    // 結算當下未休完的天數
+  payoutAmount         Float?   // 折發金額（HR 填，可選）
+  note                 String?
+  processedBy          String   // admin user id
+  processedAt          DateTime @default(now())
+
+  @@unique([userId, anniversaryYearStart])
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────────────────────

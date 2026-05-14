@@ -23,7 +23,7 @@
 5. 主管退回 → 狀態 `rejected`、附退回原因、通知員工
 6. 員工可在 `pending` 狀態自行取消（狀態 `cancelled`）
 
-### 3.2 特休天數計算（依勞基法第 38 條）
+### 3.2 特休天數計算（依勞基法第 38 條，**到職週年日制**）
 | 年資 | 天數 |
 |------|------|
 | 滿 6 個月 ~ 1 年 | 3 |
@@ -33,9 +33,16 @@
 | 5 年 ~ 10 年 | 15 |
 | 10 年以上 | 每年 +1，上限 30 |
 
-- 系統依 `hire_date` 與當前日期自動推算「當年度應有特休天數」。
-- 每年週年日重新計算；剩餘天數 = 應有天數 − 已核准天數 ± admin 調整值。
+- 結算週期：由 `hireDate` 起算，每個週年日為一個「特休年度」（例：到職 2023-03-15，則 2024-03-15 ~ 2025-03-14 為一個年度）。
+- 當前餘額 = 該週年度法定天數 + Σ(admin 調整) − Σ(該週年度內已核准/已使用)。
 - 半天 = 0.5 天，最小單位 0.5。
+
+### 3.3 年度結束處理（未休完特休 → **折發工資**）
+- 員工的週年日前一天為年度結算日。
+- 結算日當天，系統將「剩餘未休天數」列入 HR 待處理清單。
+- HR 在 `/admin/payouts` 頁面輸入折發金額並送出 → 寫入 `LeavePayout` 紀錄。
+- 折發後該年度餘額視為清空（不遞延、不歸零）。
+- 下一個週年日當天，自動產生新年度的法定額度。
 
 ## 4. 功能清單（MVP）
 
@@ -47,9 +54,11 @@
 | F4 | 申請詳細頁 / 取消 | `/leave/[id]` |
 | F5 | 主管待審清單 + 核准/退回 | `/approvals` |
 | F6 | 團隊請假行事曆 | `/calendar` |
-| F7 | Admin 員工管理 | `/admin/users` |
-| F8 | Admin 餘額手動調整 | `/admin/balances` |
-| F9 | Admin 匯出 CSV | `/admin/export` |
+| F7 | 我的個人手冊（檢視 / 編輯非敏感欄位） | `/profile` |
+| F8 | Admin 員工管理（含完整手冊） | `/admin/users` |
+| F9 | Admin 餘額手動調整 | `/admin/balances` |
+| F10 | Admin 折發工資結算 | `/admin/payouts` |
+| F11 | Admin 匯出 CSV | `/admin/export` |
 
 ## 5. API 端點（Next.js Route Handlers）
 
@@ -65,10 +74,16 @@
 | PATCH | `/api/approvals/:id/approve` | 主管 | 核准 |
 | PATCH | `/api/approvals/:id/reject` | 主管 | 退回，需附 `reason` |
 | GET | `/api/calendar` | 登入 | 取得部門範圍內的核准紀錄 |
+| GET | `/api/me/profile` | 登入 | 取得自己的員工手冊（敏感欄位遮罩） |
+| PATCH | `/api/me/profile` | 登入 | 更新自己的非敏感欄位（電話、地址、緊急聯絡人） |
 | GET | `/api/admin/users` | admin | 列出員工 |
-| POST | `/api/admin/users` | admin | 新增員工 |
-| PATCH | `/api/admin/users/:id` | admin | 編輯員工（含 hire_date、manager） |
+| POST | `/api/admin/users` | admin | 新增員工（同時建立 profile） |
+| GET | `/api/admin/users/:id/profile` | admin | 取得完整手冊（含敏感欄位明碼） |
+| PATCH | `/api/admin/users/:id` | admin | 編輯員工任職資料（hireDate、manager、department、jobTitle…） |
+| PATCH | `/api/admin/users/:id/profile` | admin | 編輯敏感欄位（身分證、銀行帳號） |
 | POST | `/api/admin/balance-adjustments` | admin | 手動加減餘額 |
+| GET | `/api/admin/payouts/pending` | admin | 待結算清單（已過週年日且仍有餘額者） |
+| POST | `/api/admin/payouts` | admin | 送出折發紀錄、清空該年度餘額 |
 | GET | `/api/admin/export` | admin | CSV 下載 |
 
 ## 6. 重要商業規則
@@ -79,7 +94,31 @@
 - **退回後可修改**：員工可修改後重新送出（產生新紀錄，狀態 pending）。
 - **稽核紀錄**：所有狀態變更寫入 `audit_logs`，至少保留 3 年。
 
-## 7. 技術棧
+## 7. 員工手冊（個人資料）
+
+### 7.1 欄位
+| 分類 | 欄位 | 員工可改 | Admin 可改 | 備註 |
+|------|------|---------|-----------|------|
+| 識別 | 員工編號 `employeeNo` | ✗ | ✓ | 唯一、由 admin 配發 |
+| 識別 | 中文姓名 / 英文姓名 | ✗ | ✓ | 法定文件用 |
+| 識別 | 出生日期 | ✗ | ✓ | |
+| 識別 | 性別 / 婚姻狀況 | ✓ | ✓ | enum |
+| 聯絡 | 手機 / 市話 / Email | ✓ | ✓ | Email 同登入帳號 |
+| 聯絡 | 戶籍地址 / 通訊地址 | ✓ | ✓ | |
+| 緊急聯絡人 | 姓名 / 關係 / 電話 | ✓ | ✓ | |
+| 任職 | 部門 / 職稱 / 雇用類型 | ✗ | ✓ | enum: FULL_TIME / PART_TIME / INTERN / CONTRACT |
+| 任職 | 到職日 `hireDate` | ✗ | ✓ | 影響特休計算 |
+| 任職 | 直屬主管 | ✗ | ✓ | |
+| 敏感 | 身分證字號 | ✗ | ✓ | AES-256-GCM 加密儲存 |
+| 敏感 | 薪轉銀行 / 帳號 | ✗ | ✓ | AES-256-GCM 加密儲存 |
+
+### 7.2 權限與顯示規則
+- 員工檢視自己的手冊時，敏感欄位以遮罩顯示（例：`A1******89`）。
+- 員工只能編輯標示「員工可改」的欄位；改後寫入 `audit_logs`。
+- 只有 admin 能看明碼及修改任職與敏感欄位。
+- 主管查看部屬時只能看：姓名、員工編號、部門、職稱、聯絡電話（用於請假聯繫），不可見薪轉、身分證、地址。
+
+## 8. 技術棧
 - **框架**：Next.js 15（App Router）+ TypeScript
 - **資料庫**：開發環境 SQLite，正式環境 PostgreSQL（透過 Prisma 切換）
 - **ORM**：Prisma
@@ -89,15 +128,18 @@
 - **通知**：MVP 階段只在 UI 顯示，後續可接 Email（Resend）或 Slack webhook
 - **部署**：Vercel（Postgres 用 Neon / Supabase / Vercel Postgres）
 
-## 8. 安全性
+## 9. 安全性
 - 密碼使用 bcrypt（cost 12+）儲存
 - Session cookie 設 `HttpOnly` + `Secure` + `SameSite=Lax`
 - 所有 API 強制檢查 session + role
 - 主管核准動作須驗證該申請的 `user.manager_id == session.user.id`
 - 速率限制（中介層）防止暴力登入
 - 不在 client 端洩漏密碼雜湊或他人個資
+- **PII 加密**：身分證、銀行帳號使用 AES-256-GCM 加密儲存，金鑰存於環境變數 `PII_ENCRYPTION_KEY`
+- **個資存取稽核**：每次讀取/解密敏感欄位寫入 `audit_logs`（action = `PII_VIEWED`），便於追查
+- 員工自助介面回傳敏感欄位一律遮罩，明碼只在 admin 介面且需二次確認後顯示
 
-## 9. 非 MVP 但已預留欄位／後續可加
+## 10. 非 MVP 但已預留欄位／後續可加
 - 多假別（事假、病假、婚假…）
 - 代理人 (`delegate_id`)
 - 附件（診斷書、喜帖）
@@ -107,9 +149,9 @@
 - 多部門、多公司
 - i18n（中英文切換）
 
-## 10. 開發里程碑（建議）
-1. **M1 基礎建設**：Next.js 專案、Prisma schema、Auth.js、seed 假資料
-2. **M2 員工端**：登入、首頁、新增/取消申請
+## 11. 開發里程碑（建議）
+1. **M1 基礎建設**：Next.js 專案、Prisma schema、Auth.js、PII 加密 util、seed 假資料
+2. **M2 員工端**：登入、首頁、新增/取消申請、個人手冊（檢視 + 編輯非敏感欄位）
 3. **M3 主管端**：待審清單、核准/退回
-4. **M4 行事曆 + Admin**：團隊行事曆、員工管理、匯出
-5. **M5 加固**：稽核紀錄、速率限制、E2E 測試（Playwright）
+4. **M4 行事曆 + Admin**：團隊行事曆、員工管理（完整手冊）、折發工資結算、匯出
+5. **M5 加固**：稽核紀錄、速率限制、PII 存取稽核、E2E 測試（Playwright）
