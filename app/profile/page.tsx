@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
+import { Briefcase, CreditCard, Lock, User } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { decryptPII, maskPII } from "@/lib/crypto";
+import { GlassCard } from "@/components/glass-card";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "./profile-form";
 
@@ -45,8 +47,7 @@ export default async function ProfilePage() {
         back={{ href: "/", label: "回首頁" }}
       />
 
-      {/* 任職資料（唯讀） */}
-      <Section title="任職資料" hint="HR 維護">
+      <Section icon={<Briefcase className="h-4 w-4" />} title="任職資料" hint="HR 維護">
         <Grid>
           <ReadField label="員工編號" value={user.employeeNo} />
           <ReadField label="角色" value={roleLabels[user.role] ?? user.role} />
@@ -60,8 +61,7 @@ export default async function ProfilePage() {
         </Grid>
       </Section>
 
-      {/* 個人基本資料（部分可編輯） */}
-      <Section title="個人資料 / 聯絡方式" hint="可自行更新">
+      <Section icon={<User className="h-4 w-4" />} title="個人資料 / 聯絡方式" hint="可自行更新">
         <ProfileForm
           initial={{
             chineseName: user.profile?.chineseName ?? "",
@@ -80,14 +80,13 @@ export default async function ProfilePage() {
         />
       </Section>
 
-      {/* 敏感資料（遮罩） */}
-      <Section title="薪資 / 證件資料" hint="僅 HR 可修改，您只看得到遮罩">
+      <Section icon={<Lock className="h-4 w-4" />} title="薪資 / 證件資料" hint="僅 HR 可修改">
         <Grid>
-          <ReadField label="身分證字號" value={nationalIdMasked || "—"} />
+          <ReadField label="身分證字號" value={nationalIdMasked || "—"} sensitive />
           <ReadField label="銀行" value={user.profile?.bankName ?? "—"} />
-          <ReadField label="薪轉帳戶" value={bankAccountMasked || "—"} />
+          <ReadField label="薪轉帳戶" value={bankAccountMasked || "—"} sensitive icon={<CreditCard className="h-3.5 w-3.5" />} />
         </Grid>
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-4 text-xs text-slate-500">
           若需更新身分證或銀行帳號，請聯繫 HR。
         </p>
       </Section>
@@ -96,34 +95,58 @@ export default async function ProfilePage() {
 }
 
 function Section({
+  icon,
   title,
   hint,
   children,
 }: {
+  icon?: React.ReactNode;
   title: string;
   hint?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{title}</h2>
-        {hint && <span className="text-xs text-slate-500">{hint}</span>}
+    <GlassCard variant="strong" className="mb-6 p-7 animate-fade-in">
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {icon && <span className="text-ios-blue">{icon}</span>}
+          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        </div>
+        {hint && (
+          <span className="rounded-full bg-slate-100/70 px-2.5 py-0.5 text-xs text-slate-600 backdrop-blur">
+            {hint}
+          </span>
+        )}
       </div>
       {children}
-    </section>
+    </GlassCard>
   );
 }
 
 function Grid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>;
+  return <div className="grid grid-cols-1 gap-5 md:grid-cols-2">{children}</div>;
 }
 
-function ReadField({ label, value }: { label: string; value: string }) {
+function ReadField({
+  label,
+  value,
+  sensitive,
+  icon,
+}: {
+  label: string;
+  value: string;
+  sensitive?: boolean;
+  icon?: React.ReactNode;
+}) {
   return (
     <div>
-      <div className="text-xs text-slate-500">{label}</div>
-      <div className="text-sm">{value}</div>
+      <div className="mb-1 flex items-center gap-1.5 text-xs uppercase tracking-wide text-slate-500">
+        {icon}
+        {label}
+      </div>
+      <div className={sensitive ? "text-sm font-mono text-slate-700" : "text-sm text-slate-900"}>
+        {value}
+      </div>
     </div>
   );
 }

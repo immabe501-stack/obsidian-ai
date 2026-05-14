@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Loader2, LogIn } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
@@ -33,9 +34,9 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="mb-1 block text-sm font-medium" htmlFor="email">
+        <label className="mb-1.5 block text-sm font-medium text-slate-700" htmlFor="email">
           Email
         </label>
         <input
@@ -44,11 +45,12 @@ export function LoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="input"
+          placeholder="you@company.com"
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium" htmlFor="password">
+        <label className="mb-1.5 block text-sm font-medium text-slate-700" htmlFor="password">
           密碼
         </label>
         <input
@@ -57,15 +59,17 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="input"
+          placeholder="••••••••"
         />
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-      >
+      {error && (
+        <div className="rounded-2xl border border-rose-200/50 bg-rose-50/60 px-4 py-2.5 text-sm text-rose-700 backdrop-blur">
+          {error}
+        </div>
+      )}
+      <button type="submit" disabled={pending} className="btn-primary w-full py-2.5">
+        {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
         {pending ? "登入中…" : "登入"}
       </button>
     </form>

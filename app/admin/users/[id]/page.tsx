@@ -5,6 +5,7 @@ import { decryptPII } from "@/lib/crypto";
 import { getBalance } from "@/lib/balance";
 import { logAudit } from "@/lib/leave-actions";
 import { getSession } from "@/lib/session";
+import { GlassCard } from "@/components/glass-card";
 import { PageHeader } from "@/components/page-header";
 import { EditUserForm } from "./edit-form";
 
@@ -28,7 +29,6 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
   ]);
   if (!user) notFound();
 
-  // 解密敏感欄位（admin 已 admin guard，紀錄 PII 檢視）
   if (session.userId) {
     await logAudit(session.userId, "PII_VIEWED", "User", id);
   }
@@ -44,18 +44,18 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
       />
 
       {balance && balance.year && (
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-2 text-sm font-semibold">本年度特休</div>
-          <div className="grid grid-cols-4 gap-4 text-sm">
+        <GlassCard variant="strong" className="mb-6 p-6 animate-fade-in">
+          <div className="mb-3 text-sm font-semibold text-slate-900">本年度特休</div>
+          <div className="grid grid-cols-4 gap-4">
             <Stat label="法定" value={balance.entitlement} />
             <Stat label="已用" value={balance.used} />
             <Stat label="申請中" value={balance.pending} />
             <Stat label="剩餘" value={balance.remaining} highlight />
           </div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-slate-500">
             週年度 {format(balance.year.start, "yyyy-MM-dd")} ~ {format(balance.year.end, "yyyy-MM-dd")}
           </p>
-        </div>
+        </GlassCard>
       )}
 
       <EditUserForm
@@ -98,8 +98,8 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
 function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
   return (
     <div>
-      <div className="text-xs text-slate-500">{label}</div>
-      <div className={`text-2xl font-semibold ${highlight ? "text-blue-600" : ""}`}>
+      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
+      <div className={`mt-1 text-3xl font-bold tracking-tight ${highlight ? "text-gradient" : "text-slate-900"}`}>
         {value}
         <span className="ml-1 text-xs font-normal text-slate-400">天</span>
       </div>

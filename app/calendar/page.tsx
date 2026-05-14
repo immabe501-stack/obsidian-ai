@@ -6,6 +6,7 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  isSameDay,
   isSameMonth,
   isWithinInterval,
   startOfMonth,
@@ -13,8 +14,10 @@ import {
   subMonths,
 } from "date-fns";
 import { LeaveStatus } from "@prisma/client";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { GlassCard } from "@/components/glass-card";
 import { PageHeader } from "@/components/page-header";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +45,7 @@ export default async function CalendarPage({
   const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
+  const today = new Date();
 
   const requests = await prisma.leaveRequest.findMany({
     where: {
@@ -83,51 +87,57 @@ export default async function CalendarPage({
         back={{ href: "/", label: "回首頁" }}
       />
 
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          href={`/calendar?month=${prev}`}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
-        >
-          ← 上個月
-        </Link>
-        <h2 className="text-lg font-semibold">{format(cursor, "yyyy 年 MM 月")}</h2>
-        <Link
-          href={`/calendar?month=${next}`}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
-        >
-          下個月 →
-        </Link>
-      </div>
+      <GlassCard variant="strong" className="overflow-hidden p-2 animate-fade-in">
+        <div className="flex items-center justify-between p-4">
+          <Link href={`/calendar?month=${prev}`} className="btn-ghost">
+            <ChevronLeft className="h-4 w-4" />
+            上個月
+          </Link>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            {format(cursor, "yyyy 年 MM 月")}
+          </h2>
+          <Link href={`/calendar?month=${next}`} className="btn-ghost">
+            下個月
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-xs">
+        <div className="grid grid-cols-7 px-2 pb-1 pt-1 text-xs">
           {["一", "二", "三", "四", "五", "六", "日"].map((d) => (
-            <div key={d} className="px-2 py-2 text-center font-medium text-slate-600">
+            <div key={d} className="px-2 py-2 text-center font-medium text-slate-500">
               {d}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 gap-1 px-2 pb-2">
           {days.map((d) => {
             const key = format(d, "yyyy-MM-dd");
             const items = byDay.get(key) ?? [];
             const inMonth = isSameMonth(d, cursor);
+            const isToday = isSameDay(d, today);
             return (
               <div
                 key={key}
-                className={`min-h-[92px] border-b border-r border-slate-100 p-1.5 text-xs ${
-                  inMonth ? "bg-white" : "bg-slate-50 text-slate-400"
-                }`}
+                className={`min-h-[96px] rounded-2xl p-2 text-xs transition-colors ${
+                  inMonth ? "bg-white/40 hover:bg-white/60" : "bg-white/10 text-slate-400"
+                } ${isToday ? "ring-2 ring-ios-blue/60" : ""}`}
               >
-                <div className="mb-1 font-medium">{format(d, "d")}</div>
+                <div className={`mb-1.5 flex items-center justify-between ${isToday ? "font-bold text-ios-blue" : ""}`}>
+                  <span>{format(d, "d")}</span>
+                  {items.length > 0 && (
+                    <span className="rounded-full bg-white/70 px-1.5 text-[10px] text-slate-600 backdrop-blur">
+                      {items.length}
+                    </span>
+                  )}
+                </div>
                 <div className="space-y-1">
                   {items.slice(0, 3).map((it, i) => (
                     <div
                       key={i}
-                      className={`truncate rounded px-1.5 py-0.5 text-[11px] ${
+                      className={`truncate rounded-lg px-1.5 py-0.5 text-[11px] ${
                         it.status === "APPROVED"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
+                          ? "bg-emerald-100/80 text-emerald-800"
+                          : "bg-amber-100/80 text-amber-800"
                       }`}
                       title={`${it.name}${it.dept ? ` · ${it.dept}` : ""}${
                         it.status === "PENDING" ? "（待審）" : ""
@@ -145,12 +155,16 @@ export default async function CalendarPage({
             );
           })}
         </div>
-      </div>
+      </GlassCard>
 
-      <p className="mt-3 text-xs text-slate-500">
-        <span className="mr-2 inline-block rounded bg-green-100 px-1.5 py-0.5 text-green-800">已核准</span>
-        <span className="inline-block rounded bg-yellow-100 px-1.5 py-0.5 text-yellow-800">申請中</span>
-      </p>
+      <div className="mt-4 flex items-center gap-3 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" /> 已核准
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-amber-500" /> 申請中
+        </span>
+      </div>
     </main>
   );
 }

@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
+import { format } from "date-fns";
 import { getSession } from "@/lib/session";
 import { getBalance } from "@/lib/balance";
+import { GlassCard } from "@/components/glass-card";
 import { PageHeader } from "@/components/page-header";
 import { LeaveForm } from "./leave-form";
-import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +28,9 @@ export default async function NewLeavePage() {
       {balance.year ? (
         <LeaveForm remaining={balance.remaining} />
       ) : (
-        <div className="rounded-md border border-slate-200 bg-white p-6 text-sm text-slate-500">
+        <GlassCard className="p-8 text-center text-sm text-slate-500">
           您目前尚未滿 6 個月，無法定特休可申請。
-        </div>
+        </GlassCard>
       )}
     </main>
   );
