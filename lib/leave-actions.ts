@@ -54,9 +54,12 @@ export async function validateLeaveRequest(
   // 取得使用者到職日，計算本年度週年期
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { hireDate: true },
+    select: { hireDate: true, annualLeaveEnabled: true },
   });
   if (!user) return { ok: false, error: "查無使用者" };
+  if (!user.annualLeaveEnabled) {
+    return { ok: false, error: "您目前的職位不享有特休，無法申請。如需開通請聯絡 HR。" };
+  }
 
   const startYear = getCurrentAnniversaryYear(user.hireDate, start);
   const endYear = getCurrentAnniversaryYear(user.hireDate, end);

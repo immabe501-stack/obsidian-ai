@@ -27,6 +27,7 @@ model User {
   jobTitle      String?                      // 職稱
   employmentType EmploymentType @default(FULL_TIME)
   active        Boolean  @default(true)
+  annualLeaveEnabled Boolean @default(true)   // 是否享有特休（非正職預設關閉，HR 可手動勾選開啟）
 
   // 直屬主管（自關聯）
   managerId     String?

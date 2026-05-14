@@ -47,6 +47,7 @@ const createSchema = z.object({
   jobTitle: z.string().max(50).optional().nullable(),
   employmentType: z.nativeEnum(EmploymentType).default(EmploymentType.FULL_TIME),
   managerId: z.string().nullable().optional(),
+  annualLeaveEnabled: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
@@ -70,6 +71,8 @@ export async function POST(req: Request) {
   }
 
   const passwordHash = await bcrypt.hash(data.password, 12);
+  // 預設特休資格：正職 → 享有；其他 → 不享有；可被 explicit 設定覆寫
+  const defaultAnnualLeave = data.employmentType === EmploymentType.FULL_TIME;
   const created = await prisma.user.create({
     data: {
       employeeNo: data.employeeNo,
@@ -82,6 +85,7 @@ export async function POST(req: Request) {
       jobTitle: data.jobTitle ?? null,
       employmentType: data.employmentType,
       managerId: data.managerId ?? null,
+      annualLeaveEnabled: data.annualLeaveEnabled ?? defaultAnnualLeave,
       profile: { create: { chineseName: data.name } },
     },
   });

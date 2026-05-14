@@ -28,6 +28,7 @@ type UserState = {
   employmentType: string;
   managerId: string;
   active: boolean;
+  annualLeaveEnabled: boolean;
 };
 
 type ProfileState = {
@@ -86,6 +87,7 @@ export function EditUserForm({
         employmentType: user.employmentType,
         managerId: user.managerId || null,
         active: user.active,
+        annualLeaveEnabled: user.annualLeaveEnabled,
         profile: {
           chineseName: profile.chineseName || null,
           englishName: profile.englishName || null,
@@ -170,6 +172,20 @@ export function EditUserForm({
               <input type="checkbox" checked={user.active} onChange={(e) => setU("active", e.target.checked)} className="h-4 w-4 rounded accent-ios-blue" />
               在職中
             </label>
+          </Field>
+          <Field label="特休資格">
+            <label className="inline-flex items-center gap-2 text-sm py-2.5">
+              <input
+                type="checkbox"
+                checked={user.annualLeaveEnabled}
+                onChange={(e) => setU("annualLeaveEnabled", e.target.checked)}
+                className="h-4 w-4 rounded accent-ios-blue"
+              />
+              享有特休（請假申請、餘額計算啟用）
+            </label>
+            <p className="mt-1 text-[11px] text-slate-400">
+              預設正職享有、其他類型不享有；可手動開啟（例如長期工讀生）
+            </p>
           </Field>
         </Grid>
       </Section>

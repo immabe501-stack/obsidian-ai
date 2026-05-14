@@ -34,11 +34,17 @@ export async function POST(req: Request) {
   // 對象必須是自己屬下（ADMIN 不受此限）
   const target = await prisma.user.findUnique({
     where: { id: data.userId },
-    select: { id: true, name: true, hireDate: true, managerId: true, active: true },
+    select: { id: true, name: true, hireDate: true, managerId: true, active: true, annualLeaveEnabled: true },
   });
   if (!target) return NextResponse.json({ error: "員工不存在" }, { status: 404 });
   if (session.role === "MANAGER" && target.managerId !== session.userId) {
     return NextResponse.json({ error: "你不是這位員工的直屬主管" }, { status: 403 });
+  }
+  if (!target.annualLeaveEnabled) {
+    return NextResponse.json(
+      { error: `${target.name} 目前不享有特休，無法補登。如需開通請至員工編輯頁勾選「享有特休」。` },
+      { status: 400 },
+    );
   }
 
   const start = startOfDay(parseDateInput(data.startDate));

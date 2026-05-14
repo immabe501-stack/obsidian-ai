@@ -40,6 +40,7 @@ export default async function HomePage() {
       department: true,
       jobTitle: true,
       hireDate: true,
+      employmentType: true,
       manager: { select: { name: true } },
     },
   });
@@ -109,7 +110,13 @@ export default async function HomePage() {
             </span>
           )}
         </div>
-        {balance.year ? (
+        {!balance.annualLeaveEnabled ? (
+          <p className="text-sm text-slate-500">
+            您目前的職位（{employmentLabel(user.employmentType)}）不享有特休。
+            <br />
+            如有疑問請聯絡 HR。
+          </p>
+        ) : balance.year ? (
           <>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <Stat label="法定天數" value={balance.entitlement} />
@@ -188,6 +195,12 @@ function NavLink({
       {icon}
       <span className="hidden sm:inline">{children}</span>
     </Link>
+  );
+}
+
+function employmentLabel(t: string): string {
+  return (
+    { FULL_TIME: "正職", PART_TIME: "兼職", CONTRACT: "約聘", INTERN: "工讀 / 實習" }[t] ?? t
   );
 }
 

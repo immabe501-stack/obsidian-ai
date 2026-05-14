@@ -9,6 +9,7 @@ export type BalanceSummary = {
   used: number; // 已核准
   pending: number; // 申請中（不含核准）
   remaining: number; // 可申請 = entitlement + adjustments - used - pending
+  annualLeaveEnabled: boolean; // 員工是否享有特休
 };
 
 /**
@@ -17,7 +18,7 @@ export type BalanceSummary = {
 export async function getBalance(userId: string, asOf: Date = new Date()): Promise<BalanceSummary> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { hireDate: true },
+    select: { hireDate: true, annualLeaveEnabled: true },
   });
   if (!user) {
     return {
@@ -27,6 +28,20 @@ export async function getBalance(userId: string, asOf: Date = new Date()): Promi
       used: 0,
       pending: 0,
       remaining: 0,
+      annualLeaveEnabled: false,
+    };
+  }
+
+  // 不享特休（兼職、工讀等未開啟）→ 全部回零、不算週年度
+  if (!user.annualLeaveEnabled) {
+    return {
+      year: null,
+      entitlement: 0,
+      adjustments: 0,
+      used: 0,
+      pending: 0,
+      remaining: 0,
+      annualLeaveEnabled: false,
     };
   }
 
@@ -39,6 +54,7 @@ export async function getBalance(userId: string, asOf: Date = new Date()): Promi
       used: 0,
       pending: 0,
       remaining: 0,
+      annualLeaveEnabled: true,
     };
   }
 
@@ -71,5 +87,6 @@ export async function getBalance(userId: string, asOf: Date = new Date()): Promi
     used,
     pending,
     remaining,
+    annualLeaveEnabled: true,
   };
 }

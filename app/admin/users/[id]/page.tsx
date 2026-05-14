@@ -83,6 +83,7 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
           employmentType: user.employmentType,
           managerId: user.manager?.id ?? "",
           active: user.active,
+          annualLeaveEnabled: user.annualLeaveEnabled,
         }}
         profile={{
           chineseName: user.profile?.chineseName ?? "",
