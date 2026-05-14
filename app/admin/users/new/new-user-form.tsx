@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Loader2, UserPlus } from "lucide-react";
+import { toast } from "sonner";
 
 type Manager = { id: string; name: string; employeeNo: string };
 
 export function NewUserForm({ managers }: { managers: Manager[] }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     employeeNo: "",
     email: "",
@@ -30,7 +30,6 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    setError(null);
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
@@ -44,9 +43,10 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "新增失敗");
+        toast.error(data.error ?? "新增失敗");
         return;
       }
+      toast.success("員工已建立");
       router.replace(`/admin/users/${data.id}`);
       router.refresh();
     } finally {
@@ -107,12 +107,6 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
           <input value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} className="input" />
         </Field>
       </div>
-
-      {error && (
-        <div className="rounded-2xl border border-rose-200/50 bg-rose-50/60 px-4 py-2.5 text-sm text-rose-700 backdrop-blur">
-          {error}
-        </div>
-      )}
 
       <div className="flex justify-end">
         <button type="submit" disabled={pending} className="btn-primary">

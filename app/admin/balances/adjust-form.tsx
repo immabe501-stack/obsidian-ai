@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check, Loader2, Pencil, X } from "lucide-react";
+import { toast } from "sonner";
 
 export function AdjustForm({ userId, userName }: { userId: string; userName: string }) {
   const router = useRouter();
@@ -10,20 +11,18 @@ export function AdjustForm({ userId, userName }: { userId: string; userName: str
   const [days, setDays] = useState("");
   const [reason, setReason] = useState("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function submit() {
     const n = parseFloat(days);
     if (isNaN(n) || n === 0) {
-      setError("請輸入非零數字（可正可負）");
+      toast.error("請輸入非零數字（可正可負）");
       return;
     }
     if (!reason.trim()) {
-      setError("請填寫原因");
+      toast.error("請填寫原因");
       return;
     }
     setPending(true);
-    setError(null);
     try {
       const res = await fetch("/api/admin/balance-adjustments", {
         method: "POST",
@@ -32,9 +31,10 @@ export function AdjustForm({ userId, userName }: { userId: string; userName: str
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "失敗");
+        toast.error(data.error ?? "失敗");
         return;
       }
+      toast.success(`已調整 ${userName} ${n > 0 ? "+" : ""}${n} 天`);
       setOpen(false);
       setDays("");
       setReason("");
@@ -73,7 +73,6 @@ export function AdjustForm({ userId, userName }: { userId: string; userName: str
         onChange={(e) => setReason(e.target.value)}
         className="input py-1.5 text-xs"
       />
-      {error && <div className="text-xs text-rose-600">{error}</div>}
       <div className="flex gap-1.5">
         <button
           onClick={submit}

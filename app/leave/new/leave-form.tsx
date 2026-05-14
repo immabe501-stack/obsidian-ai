@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { Loader2, Send, X } from "lucide-react";
+import { toast } from "sonner";
 
 function diffDays(start: string, end: string): number {
   if (!start || !end) return 0;
@@ -19,7 +20,6 @@ export function LeaveForm({ remaining }: { remaining: number }) {
   const [isHalfDay, setIsHalfDay] = useState(false);
   const [halfDayPeriod, setHalfDayPeriod] = useState<"AM" | "PM">("AM");
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   const computedDays = useMemo(() => {
@@ -31,7 +31,6 @@ export function LeaveForm({ remaining }: { remaining: number }) {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
     setPending(true);
     try {
       const res = await fetch("/api/leave-requests", {
@@ -47,9 +46,10 @@ export function LeaveForm({ remaining }: { remaining: number }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "送出失敗");
+        toast.error(data.error ?? "送出失敗");
         return;
       }
+      toast.success("申請已送出，等待主管核准");
       router.replace(`/leave/${data.id}`);
       router.refresh();
     } finally {
@@ -141,12 +141,6 @@ export function LeaveForm({ remaining }: { remaining: number }) {
           placeholder="例如：家庭旅遊、健康檢查"
         />
       </div>
-
-      {error && (
-        <div className="rounded-2xl border border-rose-200/50 bg-rose-50/60 px-4 py-2.5 text-sm text-rose-700 backdrop-blur">
-          {error}
-        </div>
-      )}
 
       <div className="flex justify-end gap-3">
         <button type="button" onClick={() => router.back()} className="btn-ghost">

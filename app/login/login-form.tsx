@@ -3,17 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Loader2, LogIn } from "lucide-react";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
     setPending(true);
     try {
       const res = await fetch("/api/auth/login", {
@@ -23,9 +22,10 @@ export function LoginForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "登入失敗");
+        toast.error(data.error ?? "登入失敗");
         return;
       }
+      toast.success("登入成功，歡迎回來");
       router.replace("/");
       router.refresh();
     } finally {
@@ -63,11 +63,6 @@ export function LoginForm() {
           placeholder="••••••••"
         />
       </div>
-      {error && (
-        <div className="rounded-2xl border border-rose-200/50 bg-rose-50/60 px-4 py-2.5 text-sm text-rose-700 backdrop-blur">
-          {error}
-        </div>
-      )}
       <button type="submit" disabled={pending} className="btn-primary w-full py-2.5">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
         {pending ? "登入中…" : "登入"}

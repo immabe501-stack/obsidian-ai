@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { GlassCard } from "@/components/glass-card";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
+import { Avatar } from "@/components/avatar";
 import { DecideButtons } from "./decide-buttons";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +63,9 @@ export default async function ApprovalsPage() {
             {pending.map((r) => (
               <li key={r.id} className="px-6 py-5">
                 <div className="mb-3 flex items-start justify-between gap-4">
-                  <div>
+                  <div className="flex items-start gap-3">
+                    <Avatar name={r.requester.name} size="md" />
+                    <div>
                     <div className="text-base font-semibold text-slate-900">
                       {r.requester.name}
                       <span className="ml-2 text-xs font-normal text-slate-500">
@@ -81,6 +84,7 @@ export default async function ApprovalsPage() {
                       )}
                     </div>
                     <div className="mt-1.5 text-sm text-slate-600">事由：{r.reason}</div>
+                    </div>
                   </div>
                   <span className="text-xs text-slate-400">{format(r.createdAt, "MM-dd HH:mm")}</span>
                 </div>
@@ -102,9 +106,10 @@ export default async function ApprovalsPage() {
                 key={r.id}
                 className="glass-subtle flex items-center justify-between rounded-2xl px-4 py-3 text-sm"
               >
-                <div>
+                <div className="flex items-center gap-2">
+                  <Avatar name={r.requester.name} size="sm" />
                   <span className="font-medium text-slate-900">{r.requester.name}</span>
-                  <span className="ml-2 text-slate-500">
+                  <span className="ml-1 text-slate-500">
                     {format(r.startDate, "yyyy-MM-dd")}（{r.days} 天）
                   </span>
                 </div>

@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { GlassCard } from "@/components/glass-card";
+import { Avatar } from "@/components/avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,12 @@ export default async function AdminUsersPage() {
                       {u.employeeNo}
                     </Link>
                   </Td>
-                  <Td>{u.name}</Td>
+                  <Td>
+                    <span className="inline-flex items-center gap-2">
+                      <Avatar name={u.name} size="sm" />
+                      {u.name}
+                    </span>
+                  </Td>
                   <Td>{roleLabels[u.role] ?? u.role}</Td>
                   <Td>{u.department ?? "—"}</Td>
                   <Td>{u.jobTitle ?? "—"}</Td>

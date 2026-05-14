@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { getBalance } from "@/lib/balance";
 import { GlassCard } from "@/components/glass-card";
+import { Avatar } from "@/components/avatar";
 import { AdjustForm } from "./adjust-form";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,12 @@ export default async function AdminBalancesPage() {
               {rows.map((u) => (
                 <tr key={u.id} className="transition-colors hover:bg-white/40">
                   <Td>{u.employeeNo}</Td>
-                  <Td className="font-medium">{u.name}</Td>
+                  <Td className="font-medium">
+                    <span className="inline-flex items-center gap-2">
+                      <Avatar name={u.name} size="sm" />
+                      {u.name}
+                    </span>
+                  </Td>
                   <Td>{format(u.hireDate, "yyyy-MM-dd")}</Td>
                   <Td>
                     {u.balance.year ? (
