@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Loader2, LogOut } from "lucide-react";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -15,12 +16,9 @@ export function LogoutButton() {
   }
 
   return (
-    <button
-      onClick={handleLogout}
-      disabled={pending}
-      className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100 disabled:opacity-50"
-    >
-      {pending ? "登出中…" : "登出"}
+    <button onClick={handleLogout} disabled={pending} className="btn-ghost">
+      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+      <span className="hidden sm:inline">{pending ? "登出中" : "登出"}</span>
     </button>
   );
 }

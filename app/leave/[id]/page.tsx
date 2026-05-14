@@ -1,8 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
+import { Calendar, Clock, FileText, MessageSquare, User as UserIcon } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { canCancel } from "@/lib/leave-actions";
+import { GlassCard } from "@/components/glass-card";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { CancelButton } from "./cancel-button";
@@ -39,7 +41,7 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
     <main className="mx-auto max-w-2xl px-6 py-10">
       <PageHeader title="特休申請詳情" back={{ href: "/", label: "回首頁" }} />
 
-      <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <GlassCard variant="strong" className="space-y-6 p-7 animate-fade-in">
         <div className="flex items-center justify-between">
           <StatusBadge status={request.status} />
           <span className="text-xs text-slate-500">
@@ -47,10 +49,11 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
           </span>
         </div>
 
-        <Field label="申請人">
-          {request.requester.name}（{request.requester.employeeNo}）
+        <Field icon={<UserIcon className="h-4 w-4" />} label="申請人">
+          {request.requester.name}
+          <span className="ml-1 text-slate-500">（{request.requester.employeeNo}）</span>
         </Field>
-        <Field label="日期">
+        <Field icon={<Calendar className="h-4 w-4" />} label="日期">
           {dateRange}
           {request.isHalfDay && (
             <span className="ml-2 text-xs text-slate-500">
@@ -58,39 +61,58 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
             </span>
           )}
         </Field>
-        <Field label="天數">{request.days} 天</Field>
-        <Field label="事由">{request.reason}</Field>
+        <Field icon={<Clock className="h-4 w-4" />} label="天數">
+          <span className="text-gradient text-lg font-semibold">{request.days}</span> 天
+        </Field>
+        <Field icon={<FileText className="h-4 w-4" />} label="事由">
+          {request.reason}
+        </Field>
 
         {request.decidedAt && (
-          <Field label={request.status === "APPROVED" ? "核准資訊" : "退回資訊"}>
-            <div>{request.approver?.name ?? "—"}</div>
+          <div className="glass-subtle rounded-2xl p-5">
+            <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
+              <MessageSquare className="h-3.5 w-3.5" />
+              {request.status === "APPROVED" ? "核准資訊" : "退回資訊"}
+            </div>
+            <div className="text-sm font-medium">{request.approver?.name ?? "—"}</div>
             <div className="text-xs text-slate-500">
               {format(request.decidedAt, "yyyy-MM-dd HH:mm")}
             </div>
             {request.decisionNote && (
-              <div className="mt-1 text-sm text-slate-700">「{request.decisionNote}」</div>
+              <div className="mt-2 text-sm text-slate-700">「{request.decisionNote}」</div>
             )}
-          </Field>
+          </div>
         )}
 
         {canCancel(request, session.userId) && (
-          <div className="border-t border-slate-100 pt-4">
+          <div className="border-t border-white/40 pt-5">
             <CancelButton id={request.id} />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-slate-500">
               取消後此申請不可恢復，需重新提出新申請。
             </p>
           </div>
         )}
-      </div>
+      </GlassCard>
     </main>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <div className="mb-1 text-xs text-slate-500">{label}</div>
-      <div className="text-sm">{children}</div>
+      <div className="mb-1 flex items-center gap-1.5 text-xs uppercase tracking-wide text-slate-500">
+        {icon}
+        {label}
+      </div>
+      <div className="text-sm text-slate-900">{children}</div>
     </div>
   );
 }

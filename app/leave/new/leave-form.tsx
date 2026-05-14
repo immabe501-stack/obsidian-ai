@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
+import { Loader2, Send, X } from "lucide-react";
 
 function diffDays(start: string, end: string): number {
   if (!start || !end) return 0;
@@ -57,20 +58,23 @@ export function LeaveForm({ remaining }: { remaining: number }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <label className="flex items-center gap-2 text-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="glass-strong space-y-6 rounded-3xl p-7 animate-fade-in"
+    >
+      <label className="inline-flex items-center gap-2 text-sm">
         <input
           type="checkbox"
           checked={isHalfDay}
           onChange={(e) => setIsHalfDay(e.target.checked)}
-          className="h-4 w-4"
+          className="h-4 w-4 rounded accent-ios-blue"
         />
         申請半天假
       </label>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium" htmlFor="startDate">
+          <label className="mb-1.5 block text-sm font-medium text-slate-700" htmlFor="startDate">
             起始日
           </label>
           <input
@@ -79,19 +83,19 @@ export function LeaveForm({ remaining }: { remaining: number }) {
             required
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="input"
           />
         </div>
         {isHalfDay ? (
           <div>
-            <label className="mb-1 block text-sm font-medium" htmlFor="halfDayPeriod">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700" htmlFor="halfDayPeriod">
               時段
             </label>
             <select
               id="halfDayPeriod"
               value={halfDayPeriod}
               onChange={(e) => setHalfDayPeriod(e.target.value as "AM" | "PM")}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="input"
             >
               <option value="AM">上午</option>
               <option value="PM">下午</option>
@@ -99,7 +103,7 @@ export function LeaveForm({ remaining }: { remaining: number }) {
           </div>
         ) : (
           <div>
-            <label className="mb-1 block text-sm font-medium" htmlFor="endDate">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700" htmlFor="endDate">
               結束日
             </label>
             <input
@@ -109,22 +113,22 @@ export function LeaveForm({ remaining }: { remaining: number }) {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               min={startDate}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="input"
             />
           </div>
         )}
       </div>
 
-      <div className="rounded-md bg-slate-50 px-4 py-3 text-sm">
+      <div className="glass-subtle rounded-2xl px-5 py-3.5 text-sm">
         本次申請天數：
-        <span className={`ml-2 font-semibold ${overBudget ? "text-red-600" : "text-slate-900"}`}>
+        <span className={`ml-2 text-lg font-bold ${overBudget ? "text-rose-600" : "text-gradient"}`}>
           {computedDays} 天
         </span>
-        {overBudget && <span className="ml-2 text-xs text-red-600">超過剩餘特休（{remaining} 天）</span>}
+        {overBudget && <span className="ml-2 text-xs text-rose-600">超過剩餘特休（{remaining} 天）</span>}
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium" htmlFor="reason">
+        <label className="mb-1.5 block text-sm font-medium text-slate-700" htmlFor="reason">
           事由
         </label>
         <textarea
@@ -133,25 +137,28 @@ export function LeaveForm({ remaining }: { remaining: number }) {
           rows={3}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="input resize-none"
+          placeholder="例如：家庭旅遊、健康檢查"
         />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <div className="rounded-2xl border border-rose-200/50 bg-rose-50/60 px-4 py-2.5 text-sm text-rose-700 backdrop-blur">
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100"
-        >
+        <button type="button" onClick={() => router.back()} className="btn-ghost">
+          <X className="h-4 w-4" />
           取消
         </button>
         <button
           type="submit"
           disabled={pending || overBudget || computedDays === 0}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="btn-primary"
         >
+          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           {pending ? "送出中…" : "送出申請"}
         </button>
       </div>

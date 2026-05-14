@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Check, Loader2 } from "lucide-react";
 
 type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PREFER_NOT_TO_SAY";
@@ -64,8 +65,8 @@ export function ProfileForm({ initial }: { initial: Initial }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <ReadOnly label="中文姓名" value={form.chineseName || "—"} />
         <ReadOnly label="英文姓名" value={form.englishName || "—"} />
         <ReadOnly label="出生日期" value={form.birthDate || "—"} />
@@ -113,39 +114,30 @@ export function ProfileForm({ initial }: { initial: Initial }) {
         />
       </div>
 
-      <fieldset className="rounded-md border border-slate-200 p-4">
-        <legend className="px-2 text-xs text-slate-500">緊急聯絡人</legend>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Text
-            label="姓名"
-            value={form.emergencyContactName}
-            onChange={(v) => set("emergencyContactName", v)}
-          />
-          <Text
-            label="關係"
-            value={form.emergencyContactRelation}
-            onChange={(v) => set("emergencyContactRelation", v)}
-          />
-          <Text
-            label="電話"
-            value={form.emergencyContactPhone}
-            onChange={(v) => set("emergencyContactPhone", v)}
-          />
+      <fieldset className="glass-subtle rounded-2xl p-5">
+        <legend className="px-2 text-xs uppercase tracking-wide text-slate-500">緊急聯絡人</legend>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <Text label="姓名" value={form.emergencyContactName} onChange={(v) => set("emergencyContactName", v)} />
+          <Text label="關係" value={form.emergencyContactRelation} onChange={(v) => set("emergencyContactRelation", v)} />
+          <Text label="電話" value={form.emergencyContactPhone} onChange={(v) => set("emergencyContactPhone", v)} />
         </div>
       </fieldset>
 
       {message && (
-        <p className={`text-sm ${message.type === "ok" ? "text-green-700" : "text-red-600"}`}>
+        <div
+          className={`rounded-2xl border px-4 py-2.5 text-sm backdrop-blur ${
+            message.type === "ok"
+              ? "border-emerald-200/50 bg-emerald-50/60 text-emerald-700"
+              : "border-rose-200/50 bg-rose-50/60 text-rose-700"
+          }`}
+        >
           {message.text}
-        </p>
+        </div>
       )}
 
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className="btn-primary">
+          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
           {pending ? "儲存中…" : "儲存變更"}
         </button>
       </div>
@@ -166,13 +158,8 @@ function Text({
 }) {
   return (
     <div className={className}>
-      <label className="mb-1 block text-xs text-slate-500">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-      />
+      <label className="mb-1.5 block text-xs uppercase tracking-wide text-slate-500">{label}</label>
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="input" />
     </div>
   );
 }
@@ -190,12 +177,8 @@ function Select({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-slate-500">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-      >
+      <label className="mb-1.5 block text-xs uppercase tracking-wide text-slate-500">{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="input">
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -209,8 +192,8 @@ function Select({
 function ReadOnly({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="mb-1 text-xs text-slate-500">{label}</div>
-      <div className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">{value}</div>
+      <div className="mb-1.5 text-xs uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="rounded-2xl bg-white/40 px-4 py-2.5 text-sm text-slate-600">{value}</div>
     </div>
   );
 }

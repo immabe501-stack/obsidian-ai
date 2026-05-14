@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Loader2, UserPlus } from "lucide-react";
 
 type Manager = { id: string; name: string; employeeNo: string };
 
@@ -54,36 +55,32 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <form
+      onSubmit={handleSubmit}
+      className="glass-strong space-y-5 rounded-3xl p-7 animate-fade-in"
+    >
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Field label="員工編號" required>
-          <input value={form.employeeNo} onChange={(e) => set("employeeNo", e.target.value)} required className={input} />
+          <input value={form.employeeNo} onChange={(e) => set("employeeNo", e.target.value)} required className="input" />
         </Field>
         <Field label="姓名" required>
-          <input value={form.name} onChange={(e) => set("name", e.target.value)} required className={input} />
+          <input value={form.name} onChange={(e) => set("name", e.target.value)} required className="input" />
         </Field>
         <Field label="Email" required>
-          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required className={input} />
+          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required className="input" />
         </Field>
         <Field label="初始密碼（員工首次登入）" required>
-          <input
-            type="text"
-            minLength={8}
-            value={form.password}
-            onChange={(e) => set("password", e.target.value)}
-            required
-            className={input}
-          />
+          <input type="text" minLength={8} value={form.password} onChange={(e) => set("password", e.target.value)} required className="input" />
         </Field>
         <Field label="角色">
-          <select value={form.role} onChange={(e) => set("role", e.target.value)} className={input}>
+          <select value={form.role} onChange={(e) => set("role", e.target.value)} className="input">
             <option value="EMPLOYEE">員工</option>
             <option value="MANAGER">主管</option>
             <option value="ADMIN">Admin</option>
           </select>
         </Field>
         <Field label="雇用類型">
-          <select value={form.employmentType} onChange={(e) => set("employmentType", e.target.value)} className={input}>
+          <select value={form.employmentType} onChange={(e) => set("employmentType", e.target.value)} className="input">
             <option value="FULL_TIME">正職</option>
             <option value="PART_TIME">兼職</option>
             <option value="CONTRACT">約聘</option>
@@ -91,16 +88,10 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
           </select>
         </Field>
         <Field label="到職日" required>
-          <input
-            type="date"
-            value={form.hireDate}
-            onChange={(e) => set("hireDate", e.target.value)}
-            required
-            className={input}
-          />
+          <input type="date" value={form.hireDate} onChange={(e) => set("hireDate", e.target.value)} required className="input" />
         </Field>
         <Field label="直屬主管">
-          <select value={form.managerId} onChange={(e) => set("managerId", e.target.value)} className={input}>
+          <select value={form.managerId} onChange={(e) => set("managerId", e.target.value)} className="input">
             <option value="">— 無 —</option>
             {managers.map((m) => (
               <option key={m.id} value={m.id}>
@@ -110,21 +101,22 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
           </select>
         </Field>
         <Field label="部門">
-          <input value={form.department} onChange={(e) => set("department", e.target.value)} className={input} />
+          <input value={form.department} onChange={(e) => set("department", e.target.value)} className="input" />
         </Field>
         <Field label="職稱">
-          <input value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} className={input} />
+          <input value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} className="input" />
         </Field>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <div className="rounded-2xl border border-rose-200/50 bg-rose-50/60 px-4 py-2.5 text-sm text-rose-700 backdrop-blur">
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className="btn-primary">
+          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
           {pending ? "建立中…" : "建立員工"}
         </button>
       </div>
@@ -132,14 +124,11 @@ export function NewUserForm({ managers }: { managers: Manager[] }) {
   );
 }
 
-const input =
-  "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
-
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-slate-500">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label className="mb-1.5 block text-xs uppercase tracking-wide text-slate-500">
+        {label} {required && <span className="text-rose-500">*</span>}
       </label>
       {children}
     </div>

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,8 +8,167 @@
   color-scheme: light;
 }
 
+/* ─── 軟漸層背景（多色 radial mesh，固定不滾動）─── */
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei",
-    Roboto, sans-serif;
+  @apply text-slate-900 antialiased;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+    "Microsoft JhengHei", sans-serif;
+  min-height: 100vh;
+  background-color: #f5f6fb;
+  background-image:
+    radial-gradient(at 18% 22%, hsla(225, 100%, 78%, 0.55) 0px, transparent 50%),
+    radial-gradient(at 82% 18%, hsla(280, 100%, 80%, 0.5) 0px, transparent 55%),
+    radial-gradient(at 50% 85%, hsla(330, 100%, 82%, 0.45) 0px, transparent 50%),
+    radial-gradient(at 88% 88%, hsla(190, 100%, 82%, 0.45) 0px, transparent 55%),
+    radial-gradient(at 10% 92%, hsla(255, 100%, 86%, 0.4) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* ─── 滾動條 ─── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.18);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.28);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+@layer components {
+  /* 玻璃霧面卡片 — 預設透明度 */
+  .glass {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      0 4px 24px rgba(15, 23, 42, 0.06),
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  /* 強化版 — 表單與深色 area */
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      0 10px 40px rgba(15, 23, 42, 0.08),
+      0 2px 4px rgba(15, 23, 42, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  /* 較淡 — 嵌套在 card 內 */
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* hover 浮起 */
+  .glass-hoverable {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .glass-hoverable:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 48px rgba(15, 23, 42, 0.12),
+      0 2px 6px rgba(15, 23, 42, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  /* 主按鈕 — 漸層 + 發光 hover */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-medium text-white transition-all duration-200;
+    background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+    box-shadow: 0 4px 16px rgba(10, 132, 255, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(10, 132, 255, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* 次按鈕 — 透明玻璃 */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateY(-1px);
+  }
+  .btn-ghost:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* 危險按鈕 */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-medium text-white transition-all duration-200;
+    background: linear-gradient(135deg, #ff453a 0%, #ff375f 100%);
+    box-shadow: 0 4px 16px rgba(255, 69, 58, 0.3);
+  }
+  .btn-danger:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(255, 69, 58, 0.4);
+  }
+
+  /* 成功按鈕 */
+  .btn-success {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-medium text-white transition-all duration-200;
+    background: linear-gradient(135deg, #30d158 0%, #34c759 100%);
+    box-shadow: 0 4px 16px rgba(48, 209, 88, 0.3);
+  }
+  .btn-success:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(48, 209, 88, 0.4);
+  }
+
+  /* 表單輸入 */
+  .input {
+    @apply w-full rounded-2xl px-4 py-2.5 text-sm transition-all duration-200;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+  .input:focus {
+    @apply outline-none;
+    background: rgba(255, 255, 255, 0.85);
+    border-color: #0a84ff;
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+  }
+
+  /* 漸層文字 — 用在標題 */
+  .text-gradient {
+    background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 50%, #bf5af2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }

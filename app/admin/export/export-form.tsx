@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Download } from "lucide-react";
 
 export function ExportForm() {
   const [from, setFrom] = useState("");
@@ -12,34 +13,22 @@ export function ExportForm() {
   const href = `/api/admin/export?${params.toString()}`;
 
   return (
-    <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="glass-strong space-y-5 rounded-3xl p-7 animate-fade-in">
       <p className="text-sm text-slate-600">
         匯出區間內所有申請（依「起始日」過濾）。CSV 含 BOM，Excel 可直接開啟。
       </p>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         <div>
-          <label className="mb-1 block text-xs text-slate-500">起 (含)</label>
-          <input
-            type="date"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          />
+          <label className="mb-1.5 block text-xs uppercase tracking-wide text-slate-500">起 (含)</label>
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="input" />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-500">迄 (含)</label>
-          <input
-            type="date"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          />
+          <label className="mb-1.5 block text-xs uppercase tracking-wide text-slate-500">迄 (含)</label>
+          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="input" />
         </div>
       </div>
-      <a
-        href={href}
-        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
+      <a href={href} className="btn-primary w-full py-2.5">
+        <Download className="h-4 w-4" />
         下載 CSV
       </a>
       <p className="text-xs text-slate-500">不填日期則匯出全部紀錄。</p>

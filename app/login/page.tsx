@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { getSession } from "@/lib/session";
+import { GlassCard } from "@/components/glass-card";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
@@ -10,14 +12,16 @@ export default async function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-1 text-2xl font-bold">員工特休系統</h1>
-        <p className="mb-6 text-sm text-slate-500">請以公司 Email 登入</p>
+      <GlassCard variant="strong" className="w-full max-w-md p-10 animate-fade-in">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-ios-blue to-ios-indigo shadow-glow">
+            <Sparkles className="h-7 w-7 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-gradient">員工特休系統</h1>
+          <p className="mt-2 text-sm text-slate-500">請以公司 Email 登入</p>
+        </div>
         <LoginForm />
-        <p className="mt-6 text-xs text-slate-400">
-          測試帳號（密碼皆 password123）：hr@example.com、alice@example.com、carol@example.com
-        </p>
-      </div>
+      </GlassCard>
     </main>
   );
 }
