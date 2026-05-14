@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, ClipboardList, Plus, Settings, User as UserIcon } from "lucide-react";
+import { BriefcaseBusiness, Calendar, ClipboardList, Plus, Settings, User as UserIcon } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { getBalance } from "@/lib/balance";
@@ -80,6 +80,11 @@ export default async function HomePage() {
           {(user.role === "MANAGER" || user.role === "ADMIN") && (
             <NavLink href="/approvals" icon={<ClipboardList className="h-4 w-4" />}>
               待審
+            </NavLink>
+          )}
+          {(user.role === "MANAGER" || user.role === "ADMIN") && (
+            <NavLink href="/manage" icon={<BriefcaseBusiness className="h-4 w-4" />}>
+              管理工具
             </NavLink>
           )}
           {user.role === "ADMIN" && (

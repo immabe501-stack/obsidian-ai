@@ -15,7 +15,7 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
   const { id } = await params;
   const session = await getSession();
 
-  const [user, managers, balance] = await Promise.all([
+  const [user, managers, balance, periods] = await Promise.all([
     prisma.user.findUnique({
       where: { id },
       include: { profile: true, manager: { select: { id: true, name: true } } },
@@ -26,6 +26,10 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
       orderBy: { employeeNo: "asc" },
     }),
     getBalance(id).catch(() => null),
+    prisma.employmentPeriod.findMany({
+      where: { userId: id },
+      orderBy: { startDate: "asc" },
+    }),
   ]);
   if (!user) notFound();
 
@@ -60,6 +64,13 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
 
       <EditUserForm
         managers={managers}
+        periods={periods.map((p) => ({
+          type: p.type,
+          startDate: p.startDate.toISOString(),
+          endDate: p.endDate?.toISOString() ?? null,
+          countsTowardSeniority: p.countsTowardSeniority,
+          note: p.note,
+        }))}
         user={{
           id: user.id,
           employeeNo: user.employeeNo,
