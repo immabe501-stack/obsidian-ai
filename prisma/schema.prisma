@@ -1,16 +1,14 @@
 // Prisma schema for 員工特休管理系統
-// 開發用 SQLite；正式環境改 provider = "postgresql" + DATABASE_URL 即可
 //
-// 執行：
-//   pnpm prisma migrate dev --name init
-//   pnpm prisma db seed
+// 雲端正式環境用 PostgreSQL（Vercel Postgres / Neon / Supabase 皆可）
+// DATABASE_URL 在 .env / Vercel 環境變數設定
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

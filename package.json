@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma db push --skip-generate --accept-data-loss && tsx prisma/bootstrap.ts && next build",
     "start": "next start",
     "lint": "next lint",
-    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
     "db:reset": "prisma migrate reset --force",
     "db:seed": "tsx prisma/seed.ts",
+    "db:bootstrap": "tsx prisma/bootstrap.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
