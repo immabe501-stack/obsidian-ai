@@ -1,0 +1,140 @@
+// Prisma schema for 員工特休管理系統
+// 開發用 SQLite；正式環境改 provider = "postgresql" + DATABASE_URL 即可
+//
+// 執行：
+//   pnpm prisma migrate dev --name init
+//   pnpm prisma db seed
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// 員工
+// ─────────────────────────────────────────────────────────────
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String
+  role          Role     @default(EMPLOYEE)
+  hireDate      DateTime
+  active        Boolean  @default(true)
+
+  // 直屬主管（自關聯）
+  managerId     String?
+  manager       User?    @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates  User[]   @relation("ManagerSubordinates")
+
+  // 反向關聯
+  leaveRequests       LeaveRequest[] @relation("Requester")
+  approvedRequests    LeaveRequest[] @relation("Approver")
+  balanceAdjustments  BalanceAdjustment[]
+  auditLogs           AuditLog[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([managerId])
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+// ─────────────────────────────────────────────────────────────
+// 特休申請
+// 一張申請對應一段連續日期；半天透過 isHalfDay + halfDayPeriod 標記
+// ─────────────────────────────────────────────────────────────
+model LeaveRequest {
+  id              String        @id @default(cuid())
+
+  requesterId     String
+  requester       User          @relation("Requester", fields: [requesterId], references: [id])
+
+  startDate       DateTime      // 起始日（00:00）
+  endDate         DateTime      // 結束日（含當日）
+  days            Float         // 實際天數，支援 0.5
+  isHalfDay       Boolean       @default(false)
+  halfDayPeriod   HalfDayPeriod?  // AM / PM，僅當 isHalfDay = true
+  reason          String
+
+  status          LeaveStatus   @default(PENDING)
+
+  approverId      String?
+  approver        User?         @relation("Approver", fields: [approverId], references: [id])
+  decidedAt       DateTime?
+  decisionNote    String?       // 退回原因 / 核准備註
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([requesterId, status])
+  @@index([startDate, endDate])
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum HalfDayPeriod {
+  AM
+  PM
+}
+
+// ─────────────────────────────────────────────────────────────
+// 餘額手動調整（admin 用，例如「補發 2 天」「轉結」）
+// 當年度餘額 = 法定應有 + Σ(adjustments) − Σ(已核准天數)
+// ─────────────────────────────────────────────────────────────
+model BalanceAdjustment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  year      Int      // 適用年度
+  days      Float    // 可為負值
+  reason    String
+  createdBy String   // admin user id
+  createdAt DateTime @default(now())
+
+  @@index([userId, year])
+}
+
+// ─────────────────────────────────────────────────────────────
+// 稽核紀錄
+// ─────────────────────────────────────────────────────────────
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String   // e.g. "LEAVE_APPROVED", "USER_CREATED"
+  targetType String   // e.g. "LeaveRequest", "User"
+  targetId   String
+  metadata   String?  // JSON-encoded payload
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Auth.js session 表（採用 database strategy 時需要）
+// 若用 JWT strategy 可省略
+// ─────────────────────────────────────────────────────────────
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  @@index([userId])
+}
