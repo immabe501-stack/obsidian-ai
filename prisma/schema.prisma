@@ -1,0 +1,225 @@
+// Prisma schema for 員工特休管理系統
+//
+// 雲端正式環境用 PostgreSQL（Vercel Postgres / Neon / Supabase 皆可）
+// DATABASE_URL 在 .env / Vercel 環境變數設定
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// 員工
+// ─────────────────────────────────────────────────────────────
+model User {
+  id            String   @id @default(cuid())
+  employeeNo    String   @unique             // 員工編號（HR 配發）
+  email         String   @unique
+  passwordHash  String
+  name          String                       // 顯示用姓名（中文）
+  role          Role     @default(EMPLOYEE)
+  hireDate      DateTime
+  department    String?                      // 部門
+  jobTitle      String?                      // 職稱
+  employmentType EmploymentType @default(FULL_TIME)
+  active        Boolean  @default(true)
+
+  // 直屬主管（自關聯）
+  managerId     String?
+  manager       User?    @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates  User[]   @relation("ManagerSubordinates")
+
+  // 員工手冊（1:1）
+  profile       EmployeeProfile?
+
+  // 反向關聯
+  leaveRequests       LeaveRequest[] @relation("Requester")
+  approvedRequests    LeaveRequest[] @relation("Approver")
+  balanceAdjustments  BalanceAdjustment[]
+  payouts             LeavePayout[]
+  auditLogs           AuditLog[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([managerId])
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+
+// ─────────────────────────────────────────────────────────────
+// 員工手冊（個人資料）
+// 與 User 分表以便 (a) 嚴格控管敏感欄位讀取  (b) 之後新增欄位不影響 auth flow
+// ─────────────────────────────────────────────────────────────
+model EmployeeProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 基本資料
+  chineseName    String?
+  englishName    String?
+  birthDate      DateTime?
+  gender         Gender?
+  maritalStatus  MaritalStatus?
+
+  // 聯絡資訊（員工可自行編輯）
+  phone          String?
+  mobile         String?
+  registeredAddress String?  // 戶籍地址
+  mailingAddress    String?  // 通訊地址
+
+  // 緊急聯絡人（員工可自行編輯）
+  emergencyContactName     String?
+  emergencyContactRelation String?
+  emergencyContactPhone    String?
+
+  // 敏感資料：AES-256-GCM 加密儲存，僅 admin 可讀寫
+  nationalIdEncrypted   String?  // 身分證字號（加密）
+  bankName              String?
+  bankAccountEncrypted  String?  // 薪轉帳戶（加密）
+
+  updatedAt     DateTime @updatedAt
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  PREFER_NOT_TO_SAY
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+// ─────────────────────────────────────────────────────────────
+// 特休申請
+// 一張申請對應一段連續日期；半天透過 isHalfDay + halfDayPeriod 標記
+// ─────────────────────────────────────────────────────────────
+model LeaveRequest {
+  id              String        @id @default(cuid())
+
+  requesterId     String
+  requester       User          @relation("Requester", fields: [requesterId], references: [id])
+
+  startDate       DateTime      // 起始日（00:00）
+  endDate         DateTime      // 結束日（含當日）
+  days            Float         // 實際天數，支援 0.5
+  isHalfDay       Boolean       @default(false)
+  halfDayPeriod   HalfDayPeriod?  // AM / PM，僅當 isHalfDay = true
+  reason          String
+
+  status          LeaveStatus   @default(PENDING)
+
+  approverId      String?
+  approver        User?         @relation("Approver", fields: [approverId], references: [id])
+  decidedAt       DateTime?
+  decisionNote    String?       // 退回原因 / 核准備註
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([requesterId, status])
+  @@index([startDate, endDate])
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum HalfDayPeriod {
+  AM
+  PM
+}
+
+// ─────────────────────────────────────────────────────────────
+// 餘額手動調整（admin 用，例如「補發 2 天」）
+// 採到職週年日制：用 anniversaryYearStart 標示適用週年度
+// 當年度餘額 = 法定應有 + Σ(adjustments) − Σ(已核准天數)
+// ─────────────────────────────────────────────────────────────
+model BalanceAdjustment {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  anniversaryYearStart DateTime // 該週年度起始日（即某次到職週年日）
+  days                 Float    // 可為負值
+  reason               String
+  createdBy            String   // admin user id
+  createdAt            DateTime @default(now())
+
+  @@index([userId, anniversaryYearStart])
+}
+
+// ─────────────────────────────────────────────────────────────
+// 折發工資紀錄
+// 員工週年日結算時，HR 將未休完天數折發成工資
+// 寫入後該年度餘額視同清空
+// ─────────────────────────────────────────────────────────────
+model LeavePayout {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  anniversaryYearStart DateTime // 被結算的週年度起始日
+  anniversaryYearEnd   DateTime // 結算日（下一個週年日前一天）
+  unusedDays           Float    // 結算當下未休完的天數
+  payoutAmount         Float?   // 折發金額（HR 填，可選）
+  note                 String?
+  processedBy          String   // admin user id
+  processedAt          DateTime @default(now())
+
+  @@unique([userId, anniversaryYearStart])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// 稽核紀錄
+// ─────────────────────────────────────────────────────────────
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String   // e.g. "LEAVE_APPROVED", "USER_CREATED"
+  targetType String   // e.g. "LeaveRequest", "User"
+  targetId   String
+  metadata   String?  // JSON-encoded payload
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Auth.js session 表（採用 database strategy 時需要）
+// 若用 JWT strategy 可省略
+// ─────────────────────────────────────────────────────────────
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  @@index([userId])
+}
