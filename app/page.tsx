@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { format } from "date-fns";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { getBalance } from "@/lib/balance";
 import { LogoutButton } from "./logout-button";
-import { format } from "date-fns";
+import { StatusBadge } from "@/components/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,15 @@ export default async function HomePage() {
             {user.manager ? ` · 主管 ${user.manager.name}` : ""}
           </p>
         </div>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/profile"
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+          >
+            個人手冊
+          </Link>
+          <LogoutButton />
+        </div>
       </header>
 
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -80,25 +89,35 @@ export default async function HomePage() {
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">最近的申請</h2>
-          <Link href="/leave/new" className="text-sm text-blue-600 hover:underline">
-            + 新增申請（尚未實作）
-          </Link>
+          {balance.year && (
+            <Link
+              href="/leave/new"
+              className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              + 新增申請
+            </Link>
+          )}
         </div>
         {recentRequests.length === 0 ? (
           <p className="text-sm text-slate-500">沒有任何申請紀錄。</p>
         ) : (
           <ul className="divide-y divide-slate-100">
             {recentRequests.map((r) => (
-              <li key={r.id} className="flex items-center justify-between py-3 text-sm">
-                <div>
-                  <div className="font-medium">
-                    {format(r.startDate, "yyyy-MM-dd")}
-                    {r.startDate.getTime() !== r.endDate.getTime() && ` ~ ${format(r.endDate, "yyyy-MM-dd")}`}
-                    <span className="ml-2 text-slate-500">（{r.days} 天）</span>
+              <li key={r.id}>
+                <Link
+                  href={`/leave/${r.id}`}
+                  className="-mx-2 flex items-center justify-between rounded-md px-2 py-3 text-sm hover:bg-slate-50"
+                >
+                  <div>
+                    <div className="font-medium">
+                      {format(r.startDate, "yyyy-MM-dd")}
+                      {r.startDate.getTime() !== r.endDate.getTime() && ` ~ ${format(r.endDate, "yyyy-MM-dd")}`}
+                      <span className="ml-2 text-slate-500">（{r.days} 天）</span>
+                    </div>
+                    <div className="text-slate-500">{r.reason}</div>
                   </div>
-                  <div className="text-slate-500">{r.reason}</div>
-                </div>
-                <StatusBadge status={r.status} />
+                  <StatusBadge status={r.status} />
+                </Link>
               </li>
             ))}
           </ul>
@@ -118,16 +137,4 @@ function Stat({ label, value, emphasis }: { label: string; value: number; emphas
       </div>
     </div>
   );
-}
-
-const statusLabels: Record<string, { label: string; cls: string }> = {
-  PENDING: { label: "待審", cls: "bg-yellow-100 text-yellow-800" },
-  APPROVED: { label: "已核准", cls: "bg-green-100 text-green-800" },
-  REJECTED: { label: "已退回", cls: "bg-red-100 text-red-800" },
-  CANCELLED: { label: "已取消", cls: "bg-slate-100 text-slate-600" },
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const s = statusLabels[status] ?? { label: status, cls: "bg-slate-100" };
-  return <span className={`rounded-full px-2.5 py-0.5 text-xs ${s.cls}`}>{s.label}</span>;
 }
