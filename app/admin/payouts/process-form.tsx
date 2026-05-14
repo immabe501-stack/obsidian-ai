@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check, Loader2, Wallet, X } from "lucide-react";
+import { toast } from "sonner";
 
 export function ProcessForm({
   userId,
@@ -20,17 +21,14 @@ export function ProcessForm({
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function submit() {
-    setPending(true);
-    setError(null);
     const amountNum = amount ? parseFloat(amount) : null;
     if (amount && (isNaN(amountNum!) || amountNum! < 0)) {
-      setError("折發金額需為非負數字");
-      setPending(false);
+      toast.error("折發金額需為非負數字");
       return;
     }
+    setPending(true);
     try {
       const res = await fetch("/api/admin/payouts", {
         method: "POST",
@@ -45,9 +43,10 @@ export function ProcessForm({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "失敗");
+        toast.error(data.error ?? "失敗");
         return;
       }
+      toast.success(`${userName} 已結算 ${unusedDays} 天`);
       setOpen(false);
       router.refresh();
     } finally {
@@ -86,7 +85,6 @@ export function ProcessForm({
         onChange={(e) => setNote(e.target.value)}
         className="input py-1.5 text-xs"
       />
-      {error && <div className="text-xs text-rose-600">{error}</div>}
       <div className="flex gap-1.5">
         <button
           onClick={submit}

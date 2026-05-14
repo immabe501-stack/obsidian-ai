@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Briefcase, Check, CreditCard, Loader2, Lock, Mail, User } from "lucide-react";
+import { toast } from "sonner";
 
 type Manager = { id: string; name: string; employeeNo: string };
 
@@ -52,7 +53,6 @@ export function EditUserForm({
   const [profile, setProfile] = useState(initialProfile);
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
 
   function setU<K extends keyof UserState>(k: K, v: UserState[K]) {
     setUser((u) => ({ ...u, [k]: v }));
@@ -64,7 +64,6 @@ export function EditUserForm({
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    setMessage(null);
     try {
       const body: Record<string, unknown> = {
         name: user.name,
@@ -103,10 +102,10 @@ export function EditUserForm({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setMessage({ type: "error", text: data.error ?? "更新失敗" });
+        toast.error(data.error ?? "更新失敗");
         return;
       }
-      setMessage({ type: "ok", text: "已儲存" });
+      toast.success("員工資料已更新");
       setPassword("");
       router.refresh();
     } finally {
@@ -214,18 +213,6 @@ export function EditUserForm({
           </Field>
         </Grid>
       </Section>
-
-      {message && (
-        <div
-          className={`rounded-2xl border px-4 py-2.5 text-sm backdrop-blur ${
-            message.type === "ok"
-              ? "border-emerald-200/50 bg-emerald-50/60 text-emerald-700"
-              : "border-rose-200/50 bg-rose-50/60 text-rose-700"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
 
       <div className="sticky bottom-4 flex justify-end">
         <button type="submit" disabled={pending} className="btn-primary px-6 py-2.5">

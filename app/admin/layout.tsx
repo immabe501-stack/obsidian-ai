@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calculator, Download, LayoutDashboard, Users, Wallet } from "lucide-react";
 import { getSession } from "@/lib/session";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -31,6 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </NavLink>
           </nav>
           <div className="flex-1" />
+          <ThemeToggle />
           <Link
             href="/"
             className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"

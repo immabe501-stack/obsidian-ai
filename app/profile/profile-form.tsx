@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 type MaritalStatus = "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "PREFER_NOT_TO_SAY";
@@ -26,7 +27,6 @@ export function ProfileForm({ initial }: { initial: Initial }) {
   const router = useRouter();
   const [form, setForm] = useState(initial);
   const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
 
   function set<K extends keyof Initial>(key: K, value: Initial[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -35,7 +35,6 @@ export function ProfileForm({ initial }: { initial: Initial }) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    setMessage(null);
     try {
       const res = await fetch("/api/me/profile", {
         method: "PATCH",
@@ -54,10 +53,10 @@ export function ProfileForm({ initial }: { initial: Initial }) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setMessage({ type: "error", text: data.error ?? "更新失敗" });
+        toast.error(data.error ?? "更新失敗");
         return;
       }
-      setMessage({ type: "ok", text: "已儲存" });
+      toast.success("個人資料已更新");
       router.refresh();
     } finally {
       setPending(false);
@@ -122,18 +121,6 @@ export function ProfileForm({ initial }: { initial: Initial }) {
           <Text label="電話" value={form.emergencyContactPhone} onChange={(v) => set("emergencyContactPhone", v)} />
         </div>
       </fieldset>
-
-      {message && (
-        <div
-          className={`rounded-2xl border px-4 py-2.5 text-sm backdrop-blur ${
-            message.type === "ok"
-              ? "border-emerald-200/50 bg-emerald-50/60 text-emerald-700"
-              : "border-rose-200/50 bg-rose-50/60 text-rose-700"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
 
       <div className="flex justify-end">
         <button type="submit" disabled={pending} className="btn-primary">

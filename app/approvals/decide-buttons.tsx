@@ -3,17 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check, Loader2, X, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export function DecideButtons({ id }: { id: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "approve" | "reject">("idle");
   const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function submit() {
     setPending(true);
-    setError(null);
     const url = mode === "approve" ? `/api/approvals/${id}/approve` : `/api/approvals/${id}/reject`;
     try {
       const res = await fetch(url, {
@@ -23,9 +22,10 @@ export function DecideButtons({ id }: { id: string }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "處理失敗");
+        toast.error(data.error ?? "處理失敗");
         return;
       }
+      toast.success(mode === "approve" ? "已核准" : "已退回");
       router.refresh();
     } finally {
       setPending(false);
@@ -58,13 +58,11 @@ export function DecideButtons({ id }: { id: string }) {
         rows={2}
         className="input resize-none"
       />
-      {error && <p className="text-sm text-rose-600">{error}</p>}
       <div className="flex justify-end gap-2">
         <button
           onClick={() => {
             setMode("idle");
             setNote("");
-            setError(null);
           }}
           className="btn-ghost"
         >
