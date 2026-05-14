@@ -42,11 +42,34 @@ model User {
   balanceAdjustments  BalanceAdjustment[]
   payouts             LeavePayout[]
   auditLogs           AuditLog[]
+  employmentPeriods   EmploymentPeriod[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([managerId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// 工作經歷段（混合制資歷）
+// 例：工讀 2022-06-01 ~ 2023-01-31，再正職 2023-02-01 ~ 至今
+// hireDate 仍為「特休年資基準日」，HR 可依此模型試算後手動回填。
+// ─────────────────────────────────────────────────────────────
+model EmploymentPeriod {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type                  EmploymentType
+  startDate             DateTime
+  endDate               DateTime?         // null = 至今
+  countsTowardSeniority Boolean  @default(true)  // 是否計入特休年資
+  note                  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startDate])
 }
 
 enum EmploymentType {

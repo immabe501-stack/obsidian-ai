@@ -2,8 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Briefcase, Check, CreditCard, Loader2, Lock, Mail, User } from "lucide-react";
+import { Briefcase, Check, Clock, CreditCard, Loader2, Lock, Mail, User } from "lucide-react";
 import { toast } from "sonner";
+import { EmploymentPeriods } from "./employment-periods";
+
+type PeriodInitial = {
+  type: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERN";
+  startDate: string;
+  endDate: string | null;
+  countsTowardSeniority: boolean;
+  note: string | null;
+};
 
 type Manager = { id: string; name: string; employeeNo: string };
 
@@ -41,10 +50,12 @@ type ProfileState = {
 
 export function EditUserForm({
   managers,
+  periods,
   user: initialUser,
   profile: initialProfile,
 }: {
   managers: Manager[];
+  periods: PeriodInitial[];
   user: UserState;
   profile: ProfileState;
 }) {
@@ -123,12 +134,15 @@ export function EditUserForm({
           <Field label="重設密碼（留空表示不變）">
             <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少 8 字元" minLength={password ? 8 : 0} className="input" />
           </Field>
-          <Field label="角色">
+          <Field label="角色與權限">
             <select value={user.role} onChange={(e) => setU("role", e.target.value)} className="input">
-              <option value="EMPLOYEE">員工</option>
-              <option value="MANAGER">主管</option>
-              <option value="ADMIN">Admin</option>
+              <option value="EMPLOYEE">員工（一般權限）</option>
+              <option value="MANAGER">主管（可審核 / 新增 / 補登屬下）</option>
+              <option value="ADMIN">HR / Admin（最高權限）</option>
             </select>
+            <p className="mt-1 text-[11px] text-slate-400">
+              HR / Admin 擁有後台所有權限；主管可審核屬下、新增員工、補登請假
+            </p>
           </Field>
           <Field label="雇用類型">
             <select value={user.employmentType} onChange={(e) => setU("employmentType", e.target.value)} className="input">
@@ -158,6 +172,15 @@ export function EditUserForm({
             </label>
           </Field>
         </Grid>
+      </Section>
+
+      <Section icon={<Clock className="h-4 w-4" />} title="工作經歷段（混合制資歷）" hint="工讀＋正職等可多段登記">
+        <EmploymentPeriods
+          userId={user.id}
+          initial={periods}
+          hireDate={user.hireDate}
+          onSuggestHireDate={(d) => setU("hireDate", d)}
+        />
       </Section>
 
       <Section icon={<User className="h-4 w-4" />} title="個人基本資料">
