@@ -59,6 +59,7 @@ const patchSchema = z.object({
   employmentType: z.nativeEnum(EmploymentType).optional(),
   managerId: z.string().nullable().optional(),
   active: z.boolean().optional(),
+  annualLeaveEnabled: z.boolean().optional(),
   // Profile 欄位
   profile: z
     .object({
@@ -123,6 +124,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (data.employmentType !== undefined) userPatch.employmentType = data.employmentType;
   if (data.managerId !== undefined) userPatch.managerId = data.managerId || null;
   if (data.active !== undefined) userPatch.active = data.active;
+  if (data.annualLeaveEnabled !== undefined) userPatch.annualLeaveEnabled = data.annualLeaveEnabled;
 
   const profilePatch: Record<string, unknown> = {};
   if (data.profile) {

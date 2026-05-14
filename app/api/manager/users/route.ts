@@ -50,6 +50,7 @@ export async function POST(req: Request) {
       jobTitle: data.jobTitle ?? null,
       employmentType: data.employmentType,
       managerId: session.userId, // 強制指派為自己
+      annualLeaveEnabled: data.employmentType === EmploymentType.FULL_TIME, // 預設依雇用類型
       profile: { create: { chineseName: data.name } },
     },
   });
