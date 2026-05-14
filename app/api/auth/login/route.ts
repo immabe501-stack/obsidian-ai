@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { checkLoginRateLimit, clientKeyFromRequest, resetLoginRateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   email: z.string().email(),
@@ -10,6 +11,15 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const ipKey = clientKeyFromRequest(req);
+  const limit = checkLoginRateLimit(ipKey);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: `嘗試過於頻繁，請於 ${limit.retryAfterSec} 秒後再試` },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } },
+    );
+  }
+
   const json = await req.json().catch(() => null);
   const parsed = schema.safeParse(json);
   if (!parsed.success) {
@@ -26,6 +36,8 @@ export async function POST(req: Request) {
   if (!ok) {
     return NextResponse.json({ error: "帳號或密碼錯誤" }, { status: 401 });
   }
+
+  resetLoginRateLimit(ipKey);
 
   const session = await getSession();
   session.userId = user.id;

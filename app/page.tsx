@@ -54,6 +54,28 @@ export default async function HomePage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/calendar"
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+          >
+            行事曆
+          </Link>
+          {(user.role === "MANAGER" || user.role === "ADMIN") && (
+            <Link
+              href="/approvals"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+            >
+              待審
+            </Link>
+          )}
+          {user.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+            >
+              HR 後台
+            </Link>
+          )}
+          <Link
             href="/profile"
             className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
           >
