@@ -13,7 +13,7 @@ export default async function ManageHome() {
 
   const subordinates = await prisma.user.findMany({
     where: session.role === "ADMIN" ? {} : { managerId: session.userId },
-    orderBy: [{ active: "desc" }, { employeeNo: "asc" }],
+    orderBy: { employeeNo: "asc" },
     select: {
       id: true,
       employeeNo: true,
