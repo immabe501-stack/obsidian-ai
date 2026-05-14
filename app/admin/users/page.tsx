@@ -11,7 +11,7 @@ const roleLabels: Record<string, string> = { EMPLOYEE: "員工", MANAGER: "主�
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
-    orderBy: [{ active: "desc" }, { employeeNo: "asc" }],
+    orderBy: { employeeNo: "asc" },
     include: { manager: { select: { name: true } } },
   });
 
